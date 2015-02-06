@@ -104,53 +104,70 @@ public class LocationWidget extends DashClockExtension {
 
 									try {
 
-										Log.v("LocationWidget", "Server reponded with: " + strResponse);
 										if (!strResponse.trim().isEmpty()) {
 
 											JSONObject jsoResponse = new JSONObject(strResponse);
 											if (jsoResponse.getString("status").equalsIgnoreCase("OK")) {
 
 												edtInformation.expandedBody("");
-												if (speSettings.getBoolean("usefeet", false)) {
-													edtInformation.expandedTitle(getString(R.string.location_feet,
-															(int) (fltAccuracy * 3.28F)));
-												} else {
-													edtInformation.expandedTitle(getString(R.string.location_mtrs,
-															fltAccuracy.intValue()));
-												}
 
 												JSONArray jsoResults = jsoResponse.getJSONArray("results");
 												Integer intMinimum = Integer.MAX_VALUE;
 
-												for (Integer intResult = 0; intResult < jsoResults.length(); intResult++) {
+                                                if (speSettings.getBoolean("showneighborhood", true)) {
+                                                    edtInformation.expandedTitle("Current Neighborhood");
+                                                    String neighborhood = "" ;
+                                                    JSONArray addressComponents = jsoResults.getJSONObject(0).getJSONArray("address_components");
+                                                    for (Integer i = 0; i < addressComponents.length(); i++) {
 
-													JSONObject jsoBounds = jsoResults.getJSONObject(intResult)
-															.getJSONObject("geometry").getJSONObject("viewport");
+                                                        JSONObject componentObj = addressComponents.getJSONObject(i);
+                                                        if (componentObj.getJSONArray("types").toString().contains("neighborhood")) {
+                                                           neighborhood = componentObj.getString("long_name");
+                                                        }
+                                                    }
+                                                    edtInformation.expandedBody(neighborhood);
+                                                    edtInformation.visible(true);
+                                                    publishUpdate(edtInformation);
+                                                }
 
-													float[] fltDistances = new float[1];
+                                                else {
 
-													Location.distanceBetween(Double.parseDouble(jsoBounds
-															.getJSONObject("northeast").getString("lat")), Double
-															.parseDouble(jsoBounds.getJSONObject("northeast")
-																	.getString("lng")), Double.parseDouble(jsoBounds
-															.getJSONObject("southwest").getString("lat")), Double
-															.parseDouble(jsoBounds.getJSONObject("southwest")
-																	.getString("lng")), fltDistances);
+                                                    if (speSettings.getBoolean("usefeet", false)) {
+                                                        edtInformation.expandedTitle(getString(R.string.location_feet,
+                                                                (int) (fltAccuracy * 3.28F)));
+                                                    } else  {
+                                                        edtInformation.expandedTitle(getString(R.string.location_mtrs,
+                                                                fltAccuracy.intValue()));
+                                                    }
 
-													if (((int) fltDistances[0] - fltAccuracy) < intMinimum) {
+                                                    for (Integer intResult = 0; intResult < jsoResults.length(); intResult++) {
 
-														intMinimum = (int) (fltDistances[0] - fltAccuracy);
-														edtInformation.expandedBody(jsoResults.getJSONObject(intResult)
-																.getString("formatted_address"));
-														edtInformation.clickIntent(new Intent(Intent.ACTION_VIEW, Uri
-																.parse("geo:0,0")));
+                                                        JSONObject jsoBounds = jsoResults.getJSONObject(intResult)
+                                                                .getJSONObject("geometry").getJSONObject("viewport");
 
-													}
+                                                        float[] fltDistances = new float[1];
 
-												}
+                                                        Location.distanceBetween(Double.parseDouble(jsoBounds
+                                                                .getJSONObject("northeast").getString("lat")), Double
+                                                                .parseDouble(jsoBounds.getJSONObject("northeast")
+                                                                        .getString("lng")), Double.parseDouble(jsoBounds
+                                                                .getJSONObject("southwest").getString("lat")), Double
+                                                                .parseDouble(jsoBounds.getJSONObject("southwest")
+                                                                        .getString("lng")), fltDistances);
 
-												edtInformation.visible(true);
-												publishUpdate(edtInformation);
+                                                        if (((int) fltDistances[0] - fltAccuracy) < intMinimum) {
+
+                                                            intMinimum = (int) (fltDistances[0] - fltAccuracy);
+                                                            edtInformation.expandedBody(jsoResults.getJSONObject(intResult)
+                                                                    .getString("formatted_address"));
+                                                            edtInformation.clickIntent(new Intent(Intent.ACTION_VIEW, Uri
+                                                                    .parse("geo:0,0")));
+
+                                                        }
+                                                    }
+                                                    edtInformation.visible(true);
+                                                    publishUpdate(edtInformation);
+                                                 }
 
 											} else if (jsoResponse.getString("status").equalsIgnoreCase("ZERO_RESULTS")) {
 												Log.w("LocationWidget",

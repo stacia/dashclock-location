@@ -8,7 +8,9 @@
     <string name="extension_info">Displays information about the device\'s current location.</string>
     <string name="over_limit">Dashclock Location Extension has hit the usage limit from Google</string>
     <string name="use_feet">Use feet</string>
+    <string name="show_neighborhood">Show neighborhood</string>
     <string name="preferences_title">Location Extension Settings</string>
     <string name="feet_summary">Use feet as the metric when displaying the accuracy</string>
+    <string name="neighborhood_summary">Show neighbhorhood instead of address</string>
 
 </resources>

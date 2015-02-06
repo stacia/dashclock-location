@@ -7,4 +7,10 @@
         android:summary="@string/feet_summary"
         android:title="@string/use_feet" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="showneighborhood"
+        android:summary="@string/neighborhood_summary"
+        android:title="@string/show_neighborhood" />
+
 </PreferenceScreen>
